@@ -12,6 +12,7 @@ import { SESSION_CLS, SESSION_LABEL, SESSION_TYPES, sessionCalls, reviewId } fro
 import { fmtPct } from '../utils/score';
 import { LAST7 } from '../utils/metrics';
 import { gradingPath } from '../utils/roster';
+import { CUR, MONTHS } from '../utils/dates';
 
 function Opportunities({ onStart }) {
   const { state, metrics, criteria } = useApp();
@@ -30,7 +31,7 @@ function Opportunities({ onStart }) {
   return (
     <>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-ui text-fg-subtle">Agents ranked by QA score (May). Gaps are the categories with the lowest share of calls meeting expectations.</p>
+        <p className="text-ui text-fg-subtle">Agents ranked by QA score ({MONTHS[CUR]}). Gaps are the categories with the lowest share of calls meeting expectations.</p>
         <select className="sm:w-48" value={team} onChange={(e) => setTeam(e.target.value)} aria-label="Team filter">
           <option value="All">All teams</option>{TEAMS.map((t) => <option key={t}>{t}</option>)}
         </select>
@@ -41,7 +42,7 @@ function Opportunities({ onStart }) {
             <div className="mb-3 flex items-center gap-3">
               <Avatar name={a.name} size={38} />
               <div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold">{a.name}</h2><small className="block">{a.team} · {a.tenure}</small></div>
-              <Badge cls={s.qa >= 88 ? 'green' : s.qa >= 80 ? 'blue' : 'red'} className="px-2.5 text-xs font-semibold tabular-nums" title="QA score (May)">{fmtPct(s.qa)}</Badge>
+              <Badge cls={s.qa >= 88 ? 'green' : s.qa >= 80 ? 'blue' : 'red'} className="px-2.5 text-xs font-semibold tabular-nums" title={`QA score (${MONTHS[CUR]})`}>{fmtPct(s.qa)}</Badge>
             </div>
             <div className="mb-3 flex flex-wrap gap-1.5">
               {gaps.map((g) => <Badge key={g} cls="amber">{criteria.find((c) => c.id === g).name} {fmtPct(s.cat[g])}</Badge>)}

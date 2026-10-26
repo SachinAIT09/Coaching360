@@ -1,12 +1,12 @@
 import { AGENTS, TEAMS } from '../data/agents';
 import { callById } from '../data/calls';
-import { TODAY_ISO, addDays } from './dates';
+import { TODAY_ISO, addDays, YEAR_START } from './dates';
 
 export const PERIODS = { 7: 'Last 7 days', 30: 'Last 30 days', 90: 'Last 90 days', ytd: 'Year to date' };
 export const SORTS = { name: 'Name', qa: 'QA score (lowest first)', attention: 'Needs attention' };
 
 export function windowOf(period) {
-  if (period === 'ytd') return { from: '2025-01-01', prev: null };
+  if (period === 'ytd') return { from: YEAR_START, prev: null };
   const n = Number(period);
   const from = addDays(TODAY_ISO, -(n - 1));
   return { from, prev: { from: addDays(from, -n), to: addDays(from, -1) } };

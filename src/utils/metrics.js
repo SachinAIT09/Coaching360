@@ -3,7 +3,7 @@ import { AGENTS, agentById } from '../data/agents';
 import { CAT_IDS, goalBehavior } from '../data/rubric';
 import { INTENTS } from '../data/intents';
 import { weightedTotal } from './score';
-import { TODAY_ISO, addDays, toISO, weekStart, shortDate, MAY, MONTHS } from './dates';
+import { TODAY_ISO, addDays, toISO, weekStart, shortDate, CUR, MONTHS, monthRange } from './dates';
 
 // All metrics are derived from the calls, using saved reviewer scores where they exist.
 const blank = () => ({ n: 0, sum: 0, met: Object.fromEntries(CAT_IDS.map((c) => [c, 0])), pos: 0, neu: 0, neg: 0, dur: 0, notes: 0 });
@@ -36,14 +36,14 @@ export function buildMetrics(reviews, criteria, dev = {}) {
     totals.set(c.id, total);
     if (dev[c.id]) continue;
     const team = agentById(c.agentId).team;
-    for (const k of [c.agentId, 'team', `team:${team}`]) addTo(bucket(k)[c.month], c, total, sc);
+    if (c.month >= 0) for (const k of [c.agentId, 'team', `team:${team}`]) addTo(bucket(k)[c.month], c, total, sc);
     if (c.iso === TODAY_ISO) {
       addTo(today, c, total, sc);
       todayIntents[c.intent[1]] = (todayIntents[c.intent[1]] || 0) + 1;
     }
   }
 
-  const agg = (key, m = MAY) => (A[key] ? A[key][m] : blank());
+  const agg = (key, m = CUR) => (A[key] ? A[key][m] : blank());
   const months = (key, ms) => ms.reduce((g, m) => {
     const x = agg(key, m);
     g.n += x.n; g.sum += x.sum; g.pos += x.pos; g.neu += x.neu; g.neg += x.neg; g.dur += x.dur; g.notes += x.notes;
@@ -62,7 +62,7 @@ export function buildMetrics(reviews, criteria, dev = {}) {
   });
 
   // key: agent id, 'team' or 'team:<name>'; m: month index or array of month indexes
-  const stats = (key, m = MAY) => of(Array.isArray(m) ? months(key, m) : agg(key, m));
+  const stats = (key, m = CUR) => of(Array.isArray(m) ? months(key, m) : agg(key, m));
   const trend = (key) => [0, 1, 2, 3, 4].map((m) => stats(key, m).qa);
 
   // Whether a call met a goal's behavior: 'met' | 'miss' | 'na'
@@ -174,13 +174,12 @@ export function buildMetrics(reviews, criteria, dev = {}) {
     rangeCache.set(k, res);
     return res;
   }
-  // QA series for an agent: weekly (last `n` weeks) or monthly (Jan–May)
+  // QA series for an agent: weekly (last `n` weeks) or monthly (the five reporting months)
   function series(agentId, gran, n = 8) {
     if (gran === 'month') {
       return MONTHS.map((label, m) => {
-        const from = `2025-${String(m + 1).padStart(2, '0')}-01`;
-        const to = m === MAY ? TODAY_ISO : addDays(`2025-${String(m + 2).padStart(2, '0')}-01`, -1);
-        return { label: m === MAY ? `${label}*` : label, from, to, value: Math.round(range(agentId, from, to).qa || 0) };
+        const [from, to] = monthRange(m);
+        return { label: m === CUR ? `${label}*` : label, from, to, value: Math.round(range(agentId, from, to).qa || 0) };
       });
     }
     const out = [];

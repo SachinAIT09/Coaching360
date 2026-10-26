@@ -4,6 +4,7 @@ import { AGENTS, agentById } from '../data/agents';
 import { BEHAVIORS, behaviorById, goalBehavior } from '../data/rubric';
 import { useApp, TODAY } from '../state/AppContext';
 import { fmtPct } from '../utils/score';
+import { shiftUS } from '../utils/dates';
 
 export const GOAL_STATES = ['Active', 'Achieved', 'Closed'];
 
@@ -12,7 +13,7 @@ export const GOAL_STATES = ['Active', 'Achieved', 'Closed'];
 export default function GoalModal({ goal, defaults = {}, sessionId, onClose, onCreated }) {
   const { dispatch, notify, metrics } = useApp();
   const editing = !!goal;
-  const start = goal || { title: '', agentId: 'a1', behavior: 'emailRequest', target: 80, due: '06/30/2025', ...defaults };
+  const start = goal || { title: '', agentId: 'a1', behavior: 'emailRequest', target: 80, due: shiftUS('06/30/2025'), ...defaults };
   const [f, setF] = useState({ ...start, behavior: goalBehavior(start)?.id || 'emailRequest', state: start.state || 'Active', change: '' });
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   const b = behaviorById(f.behavior);

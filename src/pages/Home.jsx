@@ -8,10 +8,14 @@ import { useApp, useAccount } from '../state/AppContext';
 import { REASONS } from '../utils/metrics';
 import { SESSION_CLS, SESSION_LABEL } from '../utils/review';
 import { band, fmtPct } from '../utils/score';
-import { TODAY_ISO, longToday, toISO, addDays, MAY } from '../utils/dates';
+import { TODAY_ISO, longToday, toISO, addDays, CUR, MONTHS } from '../utils/dates';
 import { agentPath, gradingPath } from '../utils/roster';
 
 const listBtn = 'grid w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-hover';
+
+// Greeting by the viewer's local time; "data as of" is when the data was loaded in this tab
+const greeting = (h = new Date().getHours()) => (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening');
+const LOADED_AT = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 export default function Home() {
   const { state, dispatch, metrics, queue } = useApp();
@@ -27,7 +31,7 @@ export default function Home() {
   const rows = AGENTS.map((a) => {
     const today = CALLS.filter((c) => c.iso === TODAY_ISO && c.agentId === a.id);
     const s = metrics.stats(a.id);
-    const prev = metrics.stats(a.id, MAY - 1).qa;
+    const prev = metrics.stats(a.id, CUR - 1).qa;
     return {
       a, s, prev, trend: metrics.trend(a.id),
       today: today.length, neg: today.filter((c) => c.sentiment === 'Negative').length,
@@ -37,7 +41,7 @@ export default function Home() {
 
   return (
     <Page>
-      <PageHeader title={`Good morning, ${account.name.split(' ')[0]}`} description={`${longToday} · Customer Service & Billing Support · data as of 12:00`} />
+      <PageHeader title={`${greeting()}, ${account.name.split(' ')[0]}`} description={`${longToday} · Customer Service & Billing Support · data as of ${LOADED_AT}`} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-6">
         <Kpi label="Calls today" value={t.n} hint="all AI-scored" />
         <Kpi label="Team QA today" value={fmtPct(t.qa)} valueClass={toneText(band(t.qa))} hint={`${fmtPct(team.qa)} month to date`} />
@@ -53,7 +57,7 @@ export default function Home() {
         <Card title="Team at a glance" right={<span className="text-xs text-fg-subtle">Lowest QA first · select a row to drill in</span>} pad={false} bodyClassName="flex flex-col">
           <div className="table-wrap mt-3">
             <table className="tbl">
-              <thead><tr><th>Agent</th><th className="num">QA (May)</th><th>Trend</th><th className="num">vs Apr</th><th className="num">Calls today</th><th className="num">Negative</th><th className="num">Flagged</th></tr></thead>
+              <thead><tr><th>Agent</th><th className="num">QA ({MONTHS[CUR]})</th><th>Trend</th><th className="num">vs {MONTHS[CUR - 1]}</th><th className="num">Calls today</th><th className="num">Negative</th><th className="num">Flagged</th></tr></thead>
               <tbody>
                 {rows.map(({ a, s, prev, trend, today, neg, flagged }) => {
                   const up = s.qa >= prev;

@@ -11,11 +11,11 @@ import { catName, goalBehavior } from '../data/rubric';
 import { useApp, TODAY, SUPERVISOR } from '../state/AppContext';
 import { getReview, gradingStatus, reviewId, reviewNotes, sessionCalls, biggestGap, SESSION_TYPES, SESSION_CLS, SESSION_LABEL } from '../utils/review';
 import { weightedTotal, band, fmtPct, fmtTime } from '../utils/score';
-import { TODAY_ISO, addDays } from '../utils/dates';
+import { TODAY_ISO, addDays, DATA_START, shortDate } from '../utils/dates';
 import { gradingPath } from '../utils/roster';
 
 const FILTERS = { all: 'All interactions', graded: 'Coach reviewed (graded)', ai: 'AI graded only', dev: 'Developmental (non-graded)', requested: 'Submitted by employee' };
-const RANGES = { 30: 'Last 30 days', 90: 'Last 90 days', all: 'Jan – May 2025' };
+const RANGES = { 30: 'Last 30 days', 90: 'Last 90 days', all: `All calls (since ${shortDate(DATA_START)})` };
 const PAGE = 12;
 const DIR_ICON = { Improving: [TrendingUp, 'text-success-fg'], Declining: [TrendingDown, 'text-danger-fg'], Steady: [Minus, 'text-fg-subtle'] };
 
@@ -83,7 +83,7 @@ function CallFinder({ agentId, linked, onLink }) {
   const [sel, setSel] = useState([]);
   const [shown, setShown] = useState(PAGE);
   const rows = useMemo(() => {
-    const from = range === 'all' ? '2025-01-01' : addDays(TODAY_ISO, -(Number(range) - 1));
+    const from = range === 'all' ? DATA_START : addDays(TODAY_ISO, -(Number(range) - 1));
     const needle = q.trim().toLowerCase();
     return callsFor(agentId).filter((c) => {
       if (c.iso < from) return false;
@@ -106,7 +106,7 @@ function CallFinder({ agentId, linked, onLink }) {
         <label className="relative min-w-0 flex-1">
           <Search size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-fg-subtle" aria-hidden="true" />
           <span className="sr-only">Search calls</span>
-          <input type="search" className="pl-8" placeholder="Review ID, call ID, date (05/14/2025), topic or tag…" value={q} onChange={reset(setQ)} />
+          <input type="search" className="pl-8" placeholder={`Review ID, call ID, date (${addDays(TODAY_ISO, -1).slice(5, 7)}/${addDays(TODAY_ISO, -1).slice(8, 10)}/${TODAY_ISO.slice(0, 4)}), topic or tag…`} value={q} onChange={reset(setQ)} />
         </label>
         <select className="lg:w-56" value={filter} onChange={reset(setFilter)} aria-label="Review type">{Object.entries(FILTERS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
         <select className="lg:w-40" value={range} onChange={reset(setRange)} aria-label="Date range">{Object.entries(RANGES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>

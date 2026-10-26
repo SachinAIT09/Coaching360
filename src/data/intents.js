@@ -1,3 +1,4 @@
+import { spoken } from '../utils/dates';
 // Contact reasons. Each holds the lines an agent might say at each score level, so a
 // call's transcript always matches its AI scores (see transcripts.js).
 export const INTENTS = {
@@ -12,7 +13,7 @@ export const INTENTS = {
     wrong: 'Your next bill will definitely be back to normal.',
     reply: { 3: 'Okay, that makes more sense now.', 2: 'Sorry, what does TOU mean?', 1: "I'm still not following why it's so high." },
     next: {
-      3: "I've requested a usage review. You'll get the results by email by May 22.",
+      3: `I've requested a usage review. You'll get the results by email by ${spoken('2025-05-22')}.`,
       2: "I've put in a usage review, so you should hear back soon.",
       1: 'If it happens again you can just call back.',
     },
@@ -86,7 +87,7 @@ export const INTENTS = {
       2: 'You should receive your final bill soon after you move.',
       1: "You'll get something in the mail.",
     },
-    recap: 'the account closes on May 31 with a final reading, and the final bill is emailed by June 6',
+    recap: `the account closes on ${spoken('2025-05-31')} with a final reading, and the final bill is emailed by ${spoken('2025-06-06')}`,
   },
   startstop: {
     disposition: 'Service — Start/Stop', label: 'Start / stop service', contact: 'Start / Stop Service', weight: 1,
@@ -109,18 +110,18 @@ export const INTENTS = {
     disposition: 'Service — Move', label: 'Move request', contact: 'Start / Stop Service', weight: 1,
     problem: 'I am moving within Mississauga. Can I transfer my service?',
     explain: {
-      3: 'Yes. I will stop service at your current address on May 30 and start it at the new one the same day, so there is no gap.',
+      3: `Yes. I will stop service at your current address on ${spoken('2025-05-30')} and start it at the new one the same day, so there is no gap.`,
       2: 'We can process a transfer with the stop and start reads on the same date.',
       1: 'Yeah, we can move it.',
     },
     wrong: 'The transfer is completed instantly with no final bill.',
     reply: { 3: 'That works, thanks.', 2: 'Reads? Do I need to be home?', 1: 'Do I need to do anything else?' },
     next: {
-      3: 'Both reads happen May 30. Your final bill for the old address will be emailed by June 4.',
+      3: `Both reads happen ${spoken('2025-05-30')}. Your final bill for the old address will be emailed by ${spoken('2025-06-04')}.`,
       2: 'The transfer will go through around your move date.',
       1: 'Call us if anything goes wrong.',
     },
-    recap: 'service moves to your new address on May 30 with no gap, and the old-address final bill comes by June 4',
+    recap: `service moves to your new address on ${spoken('2025-05-30')} with no gap, and the old-address final bill comes by ${spoken('2025-06-04')}`,
   },
 };
 

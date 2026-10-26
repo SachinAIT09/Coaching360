@@ -7,6 +7,7 @@ import { CAT_IDS } from '../data/rubric';
 import { useApp } from '../state/AppContext';
 import { fmtPct } from '../utils/score';
 import { agentPath, gradingPath } from '../utils/roster';
+import { CUR, MONTHS, MONTHS_LONG } from '../utils/dates';
 
 const REPORTS = [
   { id: 'qa', title: 'QA Summary', desc: 'Average score and trend per agent', icon: Gauge },
@@ -16,7 +17,10 @@ const REPORTS = [
   { id: 'alerts', title: 'Policy Alerts', desc: 'Guardrail and policy violations', icon: ShieldAlert },
   { id: 'notes', title: 'Contact Notes', desc: 'Template completeness (CIS)', icon: ClipboardList },
 ];
-const RANGES = { 'May 2025 (to date)': [4], 'April 2025': [3], 'March 2025': [2], 'Jan – May 2025': [0, 1, 2, 3, 4] };
+const RANGES = {
+  [`${MONTHS_LONG[CUR]} (to date)`]: [CUR], [MONTHS_LONG[CUR - 1]]: [CUR - 1], [MONTHS_LONG[CUR - 2]]: [CUR - 2],
+  [`${MONTHS[0]} – ${MONTHS[CUR]} (5 months)`]: [0, 1, 2, 3, 4],
+};
 
 function build(id, agents, m, metrics, criteria, reviews) {
   const s = (a) => metrics.stats(a.id, m);
@@ -24,7 +28,7 @@ function build(id, agents, m, metrics, criteria, reviews) {
   switch (id) {
     case 'qa':
       return {
-        cols: ['Agent', 'Team', 'Calls scored', 'Avg QA', 'Δ vs Jan', 'Coverage'],
+        cols: ['Agent', 'Team', 'Calls scored', 'Avg QA', `Δ vs ${MONTHS[0]}`, 'Coverage'],
         rows: agents.map((a) => [a.name, a.team, s(a).n.toLocaleString(), fmtPct(s(a).qa), `${s(a).qa - metrics.stats(a.id, 0).qa >= 0 ? '+' : ''}${(s(a).qa - metrics.stats(a.id, 0).qa).toFixed(1)} pts`, '100%']),
         bars: agents.map((a) => ({ name: a.name, v: s(a).qa })), metric: 'Avg QA score',
       };
@@ -73,7 +77,7 @@ export default function Reports() {
   const [params, setParams] = useSearchParams();
   const rid = REPORTS.some((r) => r.id === params.get('r')) ? params.get('r') : 'qa';
   const [team, setTeam] = useState('All teams');
-  const [range, setRange] = useState('May 2025 (to date)');
+  const [range, setRange] = useState(Object.keys(RANGES)[0]);
   const agents = AGENTS.filter((a) => team === 'All teams' || a.team === team);
   const report = REPORTS.find((r) => r.id === rid);
   const data = build(rid, agents, RANGES[range], metrics, criteria, state.reviews);

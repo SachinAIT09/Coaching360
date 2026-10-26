@@ -2,7 +2,7 @@ import { AGENTS, agentById } from '../data/agents';
 import { CALLS } from '../data/calls';
 import { fmtPct } from './score';
 import { LAST7 } from './metrics';
-import { MAY, TODAY_ISO } from './dates';
+import { CUR, MONTHS, MONTHS_LONG, TODAY_ISO } from './dates';
 
 // Canned "Ask about your team" answers, computed from the same metrics as the screens.
 export const SUGGESTIONS = [
@@ -61,10 +61,10 @@ export function askAi(question, { metrics, state, criteria }) {
   }
 
   if (has(q, 'aht', 'handle time', 'handling time', 'long calls')) {
-    const prev = metrics.stats('team', MAY - 1).aht;
+    const prev = metrics.stats('team', CUR - 1).aht;
     return {
       title: `Average handle time ${team.aht.toFixed(1)} min this month`,
-      text: `Down ${(prev - team.aht).toFixed(1)} min from April. Newer agents have the longest calls.`,
+      text: `Down ${(prev - team.aht).toFixed(1)} min from ${MONTHS_LONG[CUR - 1].split(' ')[0]}. Newer agents have the longest calls.`,
       rows: AGENTS.map((a) => ({ a, v: metrics.stats(a.id).aht })).sort((x, y) => y.v - x.v)
         .map(({ a, v }) => ({ label: a.name, value: `${v.toFixed(1)} min`, agentId: a.id })),
     };
@@ -74,7 +74,7 @@ export function askAi(question, { metrics, state, criteria }) {
     const ranked = AGENTS.slice().sort((a, b) => qa(b) - qa(a));
     return {
       title: `${ranked[0].name} leads the team this month`,
-      text: `Top three by QA score, May to date. Team average is ${fmtPct(team.qa)}.`,
+      text: `Top three by QA score, ${MONTHS[CUR]} to date. Team average is ${fmtPct(team.qa)}.`,
       rows: ranked.slice(0, 3).map((a, i) => ({ label: `#${i + 1} ${a.name}`, value: fmtPct(qa(a)), agentId: a.id })),
     };
   }
@@ -85,7 +85,7 @@ export function askAi(question, { metrics, state, criteria }) {
     const below = AGENTS.map((a) => ({ a, v: metrics.stats(a.id).cat[cat] })).filter((x) => x.v < 85).sort((x, y) => x.v - y.v);
     return {
       title: below.length ? `${below.length} agents are below 85% on ${catLabel}` : `Everyone is above 85% on ${catLabel}`,
-      text: below.length ? `${below[0].a.name} has the biggest gap. Percentages are calls meeting expectations, May to date.` : 'No coaching needed on this category right now.',
+      text: below.length ? `${below[0].a.name} has the biggest gap. Percentages are calls meeting expectations, ${MONTHS[CUR]} to date.` : 'No coaching needed on this category right now.',
       rows: below.map(({ a, v }) => ({ label: a.name, value: fmtPct(v), agentId: a.id })),
     };
   }
@@ -93,7 +93,7 @@ export function askAi(question, { metrics, state, criteria }) {
     const t = metrics.trend('team');
     return {
       title: `${catLabel}: ${fmtPct(team.cat[cat])} of calls meet expectations`,
-      text: `Team-wide, May to date. In January it was ${fmtPct(metrics.stats('team', 0).cat[cat])}. Team QA moved from ${fmtPct(t[0])} to ${fmtPct(t[4])}.`,
+      text: `Team-wide, ${MONTHS[CUR]} to date. In ${MONTHS_LONG[0].split(' ')[0]} it was ${fmtPct(metrics.stats('team', 0).cat[cat])}. Team QA moved from ${fmtPct(t[0])} to ${fmtPct(t[4])}.`,
       rows: AGENTS.map((a) => ({ label: a.name, value: fmtPct(metrics.stats(a.id).cat[cat]), agentId: a.id })),
     };
   }

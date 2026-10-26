@@ -1,3 +1,4 @@
+import { shiftUS } from '../utils/dates';
 // Base QA rubric (template v3). Weights come from the Call Grading matrix mockup; the final
 // weights must match the client's approved grading matrix.
 // The active rubric lives in app state (see QA Template Settings); this is the seed.
@@ -44,7 +45,7 @@ export const CAT_ORDER = ['accuracy', 'opening', 'closing', 'expectation', 'word
 
 export const defaultRubric = () => ({
   version: 3,
-  published: '04/22/2025',
+  published: shiftUS('04/22/2025'),
   criteria: BASE_RUBRIC.map((c) => ({ ...c, on: true })),
 });
 

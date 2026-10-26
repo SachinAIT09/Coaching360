@@ -3,7 +3,7 @@ import { BASE_RUBRIC, BINARY, CAT_IDS, insight } from './rubric';
 import { INTENTS, INTENT_KEYS, CUSTOMERS } from './intents';
 import { CONTACT_TYPES } from './contactTypes';
 import { rng, weightedTotal, fmtTime } from '../utils/score';
-import { TODAY_ISO, toUS, monthOf, workingDays } from '../utils/dates';
+import { BASE_TODAY, BASE_START, toUS, monthOf, monthIndex, shift, workingDays } from '../utils/dates';
 
 const EMOTION = { Positive: ['Satisfied', 'Appreciative'], Neutral: ['Calm', 'Concerned'], Negative: ['Frustrated', 'Concerned'] };
 const intentWeights = INTENT_KEYS.map((k) => INTENTS[k].weight);
@@ -34,13 +34,15 @@ function finish(c, rand) {
   c.intent = [INTENTS[c.intentKey].disposition, INTENTS[c.intentKey].label];
   c.duration = fmtTime(c.durSec);
   c.date = toUS(c.iso);
-  c.month = monthOf(c.iso);
+  c.month = monthIndex(c.iso); // reporting month (0..4), -1 before the window
   c.aiTotal = total;
   return c;
 }
 
-function makeCall(id, a, iso, minute, rand) {
-  const m = monthOf(iso);
+// Calls are generated on the base calendar (so the data never changes) and dated `shift(baseIso)`
+function makeCall(id, a, baseIso, minute, rand) {
+  const iso = shift(baseIso);
+  const m = monthOf(baseIso); // 0 (Jan) .. 4 (May) on the base calendar drives each agent's growth
   const decay = 1 - (a.growth * (4 - m)) / 4;
   const intentKey = pickIntent(rand());
   const direction = (intentKey === 'outage' || intentKey === 'payment_arr') && rand() < 0.3 ? 'Outbound' : 'Inbound';
@@ -71,8 +73,8 @@ function makeCall(id, a, iso, minute, rand) {
 const generated = [];
 const rand = rng(2025);
 let seq = 2850000;
-for (const iso of workingDays('2025-01-02', TODAY_ISO)) {
-  const today = iso === TODAY_ISO;
+for (const iso of workingDays(BASE_START, BASE_TODAY)) {
+  const today = iso === BASE_TODAY;
   for (const a of AGENTS) {
     const n = today ? 3 + Math.floor(rand() * 3) : 6 + Math.floor(rand() * 4);
     const minutes = Array.from({ length: n }, () => (today ? 485 + Math.floor(rand() * 230) : 480 + Math.floor(rand() * 540))).sort((x, y) => x - y);
@@ -85,7 +87,7 @@ const toScores = (arr) => Object.fromEntries(CAT_IDS.map((id, i) => [id, arr[i]]
 const hero = (id, agentId, iso, time, dur, intentKey, customer, sentiment, emotion, arr, { conf: confOverride, ...extra } = {}) => {
   const ai = toScores(arr);
   const conf = Object.fromEntries(CAT_IDS.map((c) => [c, c === 'tone' || c === 'pace' ? 0.84 : 0.94]));
-  return { id, agentId, iso, time, durSec: dur, direction: 'Inbound', intentKey, customer, customerType: 'Residential',
+  return { id, agentId, iso: shift(iso), time, durSec: dur, direction: 'Inbound', intentKey, customer, customerType: 'Residential',
     account: String(10000000 + ((Number(id) * 7919) % 89999999)), ai, conf: { ...conf, ...confOverride }, violation: null,
     notesOk: true, notesMissing: null, sentiment, emotion, ...extra };
 };

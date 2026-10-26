@@ -4,7 +4,7 @@ import { AGENTS } from '../data/agents';
 import { CAT_IDS } from '../data/rubric';
 import { useApp } from '../state/AppContext';
 import { avg, fmtPct } from '../utils/score';
-import { MONTHS, MAY } from '../utils/dates';
+import { MONTHS, MONTHS_LONG, CUR } from '../utils/dates';
 import { agentPath } from '../utils/roster';
 
 // Full class names so Tailwind can detect them
@@ -24,8 +24,8 @@ export default function TeamAnalytics() {
   const qa = (a) => metrics.stats(a.id).qa;
   const ranked = AGENTS.slice().sort((a, b) => qa(b) - qa(a));
   const team = metrics.stats('team');
-  const prev = metrics.stats('team', MAY - 1);
-  const trend = metrics.trend('team').map((v, i) => ({ label: i === 4 ? 'May*' : MONTHS[i], value: Math.round(v) }));
+  const prev = metrics.stats('team', CUR - 1);
+  const trend = metrics.trend('team').map((v, i) => ({ label: i === CUR ? `${MONTHS[i]}*` : MONTHS[i], value: Math.round(v) }));
   const cats = criteria.filter((c) => CAT_IDS.includes(c.id));
   const cal = metrics.calibration;
   const groups = [
@@ -36,21 +36,21 @@ export default function TeamAnalytics() {
 
   return (
     <Page>
-      <PageHeader title="Team Analytics" description="Supervisor view across all agents in Customer Service and Billing Support. May is month to date." />
+      <PageHeader title="Team Analytics" description={`Supervisor view across all agents in Customer Service and Billing Support. ${MONTHS_LONG[CUR].split(' ')[0]} is month to date.`} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <Kpi label="Team QA score" value={fmtPct(team.qa)} hint={`▲ ${(team.qa - trend[0].value).toFixed(1)} pts since Jan`} hintClass="text-success-fg" />
-        <Kpi label="Calls AI-scored (May)" value={team.n.toLocaleString()} hint="100% coverage" />
+        <Kpi label="Team QA score" value={fmtPct(team.qa)} hint={`▲ ${(team.qa - trend[0].value).toFixed(1)} pts since ${MONTHS[0]}`} hintClass="text-success-fg" />
+        <Kpi label={`Calls AI-scored (${MONTHS[CUR]})`} value={team.n.toLocaleString()} hint="100% coverage" />
         <Kpi label="Positive sentiment" value={fmtPct(team.pos)} hint={`${fmtPct(team.neg)} negative`} />
         <Kpi
           label="Avg handle time" value={`${team.aht.toFixed(1)} min`}
-          hint={`${team.aht <= prev.aht ? '▼' : '▲'} ${Math.abs(prev.aht - team.aht).toFixed(1)} min vs April`} hintClass={team.aht <= prev.aht ? 'text-success-fg' : ''}
+          hint={`${team.aht <= prev.aht ? '▼' : '▲'} ${Math.abs(prev.aht - team.aht).toFixed(1)} min vs ${MONTHS_LONG[CUR - 1].split(' ')[0]}`} hintClass={team.aht <= prev.aht ? 'text-success-fg' : ''}
         />
         <Kpi label="Contact notes complete" value={fmtPct(team.notes)} hint="CIS templates" />
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_1fr]">
         <Card title="Team QA trend"><LineChart data={trend} height={250} /></Card>
-        <Card title="Top performers (May)">
+        <Card title={`Top performers (${MONTHS[CUR]})`}>
           <ol className="-mx-2 flex flex-col">
             {ranked.slice(0, 5).map((a, i) => (
               <li key={a.id}><button className="grid w-full grid-cols-[1.5rem_auto_1fr_auto] items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-surface-hover" onClick={() => open(a.id)}>
@@ -71,7 +71,7 @@ export default function TeamAnalytics() {
         </Card>
       </div>
 
-      <Card title="Category heatmap · % of calls meeting expectations (May)" right={<span className="text-xs text-fg-subtle">Select a name for the agent, a cell for coaching</span>}>
+      <Card title={`Category heatmap · % of calls meeting expectations (${MONTHS[CUR]})`} right={<span className="text-xs text-fg-subtle">Select a name for the agent, a cell for coaching</span>}>
         <div className="table-wrap -mx-4 px-4 sm:-mx-5 sm:px-5">
           <div className="grid min-w-[40rem] items-center gap-1" style={{ gridTemplateColumns: `minmax(8rem,10rem) repeat(${cats.length}, minmax(3.5rem,1fr))` }}>
             <span />{cats.map((c) => <small key={c.id} className="px-0.5 pb-1 text-center text-2xs leading-tight font-medium">{c.name}</small>)}

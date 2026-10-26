@@ -9,10 +9,10 @@ import { useApp, useViewAgent } from '../state/AppContext';
 import { callStatus, gradingStatus, reviewId } from '../utils/review';
 import { band, callTag, fmtPct } from '../utils/score';
 import { LAST7 } from '../utils/metrics';
-import { TODAY_ISO, addDays } from '../utils/dates';
+import { TODAY_ISO, addDays, CUR, DATA_START, MONTHS, monthRange, shortDate } from '../utils/dates';
 import { gradingPath } from '../utils/roster';
 
-const RANGES = { '7d': ['Last 7 days', LAST7], mtd: ['May to date', '2025-05-01'], '30d': ['Last 30 days', addDays(TODAY_ISO, -29)], all: ['Jan – May 2025', '2025-01-01'] };
+const RANGES = { '7d': ['Last 7 days', LAST7], mtd: [`${MONTHS[CUR]} to date`, monthRange(CUR)[0]], '30d': ['Last 30 days', addDays(TODAY_ISO, -29)], all: [`All calls (since ${shortDate(DATA_START)})`, DATA_START] };
 const PAGE = 25;
 const REVIEW_TYPES = ['AI Graded', 'In Review', 'Coach Validated', 'Coach Graded', 'Developmental'];
 
@@ -54,7 +54,7 @@ export default function CallLibrary({ mine }) {
   }, [source, mine, metrics, q, range, agent, sent, score, flagged, sort, rtype, tag, state]);
   const pager = usePages(rows, PAGE);
 
-  const mtd = source.filter((c) => c.month === 4).length;
+  const mtd = source.filter((c) => c.month === CUR).length;
   const th = (key, label, num) => {
     const on = sort.key === key;
     const Icon = !on ? ArrowUpDown : sort.dir === 1 ? ArrowUp : ArrowDown;
@@ -74,7 +74,7 @@ export default function CallLibrary({ mine }) {
       <PageHeader
         title={mine ? 'My Calls' : 'Call Library'}
         description={mine ? 'Every one of your calls is scored. Open one to see the evidence, or dispute a score.' : 'Every call, automatically scored. Not just the two per agent per month that supervisors could review by hand.'}
-        aside={<Callout value={mtd.toLocaleString()} sub={!mine && `vs ~${AGENTS.length * 2} a month with manual QA`}>calls AI-scored in May</Callout>}
+        aside={<Callout value={mtd.toLocaleString()} sub={!mine && `vs ~${AGENTS.length * 2} a month with manual QA`}>{`calls AI-scored in ${MONTHS[CUR]}`}</Callout>}
       />
       <div className="card flex flex-col gap-3 p-3 sm:p-4 lg:flex-row lg:flex-wrap lg:items-center">
         <label className="relative min-w-0 flex-1 lg:min-w-72">

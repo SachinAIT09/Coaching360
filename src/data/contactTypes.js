@@ -1,4 +1,5 @@
 import { INTENTS, emailOf } from './intents';
+import { shiftUS, shortDate, shift } from '../utils/dates';
 
 // CIS contact types and their required note fields
 export const CONTACT_TYPES = {
@@ -10,21 +11,21 @@ export const CONTACT_TYPES = {
 };
 
 const VALUES = {
-  'Bill period': 'Apr 8 – May 11 (34 days)',
+  'Bill period': `${shortDate(shift('2025-04-08'))} – ${shortDate(shift('2025-05-11'))} (34 days)`,
   'Explanation provided': (c) => INTENTS[c.intentKey].recap,
   'Adjustment requested': 'No — usage review requested',
   'Next step & timeframe': (c) => INTENTS[c.intentKey].next[c.ai.expectation],
   'Amount owed': '$412.00',
   'Installment schedule': '4 × $103 monthly',
-  'First payment date': '06/10/2025',
+  'First payment date': shiftUS('06/10/2025'),
   'Customer consent': 'Verbal consent recorded',
   'Closure reason': 'Moving out of state',
-  'Final bill date': '06/06/2025',
+  'Final bill date': shiftUS('06/06/2025'),
   'Forwarding address': '4410 Mesa Verde Dr, Albuquerque NM',
   'Deposit refund method': 'Applied to final bill',
   'Verified identity': 'Yes — account number + service address',
   'Service address': '2210 Elm Ave, Lubbock TX',
-  'Effective date': '06/01/2025',
+  'Effective date': shiftUS('06/01/2025'),
   'Meter reading': 'Remote read scheduled',
   'Contact email': (c) => (c.ai.opening === 3 ? emailOf(c.customer) : ''),
   'Outage area': '34th St & Indiana Ave (240 customers)',

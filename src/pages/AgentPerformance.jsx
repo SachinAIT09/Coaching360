@@ -16,7 +16,7 @@ import { getConversation } from '../data/transcripts';
 import { useApp, useViewAgent } from '../state/AppContext';
 import { getReview, callStatus, gradingStatus, isDev, reviewId, SESSION_CLS, SESSION_LABEL } from '../utils/review';
 import { weightedTotal, band, fmtPct, fmtTime } from '../utils/score';
-import { TODAY_ISO, addDays, toISO } from '../utils/dates';
+import { TODAY_ISO, addDays, toISO, CUR, MONTHS } from '../utils/dates';
 import { PERIODS, windowOf, isAgentId, rosterParams, gradingPath } from '../utils/roster';
 
 const TABS = ['AI Evaluation', 'Transcript', 'Key Moments', 'Sentiment', 'Notes'];
@@ -438,7 +438,7 @@ function PerformanceView({ agentId, mine }) {
             const p = trend[i];
             open(`Calls for ${p.label} (${p.from === p.to ? p.from : `${p.from} – ${p.to}`})`, metrics.range(agent.id, p.from, p.to).calls.map((c) => ({ call: c })));
           }} />
-          <p className="mt-1 text-xs text-fg-subtle">Select a point to see its calls. Dashed lines mark coaching sessions.{gran === 'Monthly' && ' *May to date.'}</p>
+          <p className="mt-1 text-xs text-fg-subtle">Select a point to see its calls. Dashed lines mark coaching sessions.{gran === 'Monthly' && ` *${MONTHS[CUR]} to date.`}</p>
         </Card>
         <Card title="Category performance" right={<span className="text-xs text-fg-subtle">% meeting expectations · {PERIODS[period]}</span>}>
           <ul className="flex flex-col gap-1">

@@ -3,7 +3,7 @@ import { callById, callsFor } from '../data/calls';
 import { defaultRubric } from '../data/rubric';
 import { SEED_SESSIONS, SEED_GOALS, SEED_ALERTS, seedReviews, seedDev } from '../data/seeds';
 import { buildMetrics, buildQueue } from '../utils/metrics';
-import { TODAY } from '../utils/dates';
+import { TODAY, TODAY_ISO, BASE_TODAY, dayGap, moveUS } from '../utils/dates';
 import { agentById } from '../data/agents';
 import { accountFor } from './accounts';
 
@@ -14,6 +14,7 @@ export const HOME = { supervisor: '/home', agent: '/me' };
 const KEY = 'coaching360-demo-v3';
 
 const initial = () => ({
+  anchor: TODAY_ISO, // the day the dates below belong to; saved data moves forward with the calendar
   user: null, // signed-in account email
   role: 'supervisor',
   agentId: 'a1',
@@ -27,10 +28,24 @@ const initial = () => ({
   rubric: defaultRubric(),
 });
 
+// Move every MM/DD/YYYY value (optionally with a time) in saved data by n days
+const DATE_VALUE = /^\d\d\/\d\d\/\d{4}( \d\d:\d\d)?$/;
+function moveDates(v, n) {
+  if (typeof v === 'string') return DATE_VALUE.test(v) ? moveUS(v, n) : v;
+  if (Array.isArray(v)) return v.map((x) => moveDates(x, n));
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, moveDates(x, n)]));
+  return v;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...initial(), ...JSON.parse(raw) } : initial();
+    if (!raw) return initial();
+    const saved = JSON.parse(raw);
+    // Data saved on an earlier day (or before dates followed the calendar) moves forward with it
+    const gap = dayGap(saved.anchor || BASE_TODAY);
+    const moved = gap ? { ...moveDates(saved, gap), user: saved.user, role: saved.role } : saved;
+    return { ...initial(), ...moved, anchor: TODAY_ISO };
   } catch {
     return initial();
   }

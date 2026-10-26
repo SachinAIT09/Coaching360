@@ -5,6 +5,8 @@ export const AGENT_ROUTES = ['me', 'me/calls', 'me/coaching', 'me/goals'];
 
 // Start from fresh demo data, signed in with the given role (role: null = signed out) and theme preference
 export async function boot(page, { role = 'supervisor', theme } = {}) {
+  // The demo calendar follows the real date; pin it to the base day so expected numbers hold
+  await page.clock.setFixedTime(new Date(2025, 4, 15, 10, 0));
   await page.addInitScript(({ role, theme }) => {
     if (sessionStorage.getItem('__booted')) return;
     sessionStorage.setItem('__booted', '1');
