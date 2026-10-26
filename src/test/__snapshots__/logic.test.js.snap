@@ -1,0 +1,113 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`metrics on seed data > Ask answers are computed from the data 1`] = `
+{
+  "rows": [
+    {
+      "agentId": "a3",
+      "label": "Yuki Tanaka · 4 calls",
+      "value": "95%",
+    },
+    {
+      "agentId": "a6",
+      "label": "Ingrid Larsen · 5 calls",
+      "value": "95%",
+    },
+    {
+      "agentId": "a4",
+      "label": "Giulia Romano · 3 calls",
+      "value": "86%",
+    },
+    {
+      "agentId": "a1",
+      "label": "Camille Dubois · 3 calls",
+      "value": "84%",
+    },
+    {
+      "agentId": "a2",
+      "label": "Lukas Becker · 5 calls",
+      "value": "82%",
+    },
+    {
+      "agentId": "a5",
+      "label": "Mateo Silva · 3 calls",
+      "value": "79%",
+    },
+    {
+      "agentId": "a7",
+      "label": "Omar Haddad · 4 calls",
+      "value": "77%",
+    },
+  ],
+  "text": "27 calls scored so far. Yuki Tanaka is strongest today at 95%; Omar Haddad is lowest at 77%. 11% of today's calls had negative sentiment, and 2 alerts are open.",
+  "title": "Team QA is 86% today (86% month to date)",
+}
+`;
+
+exports[`metrics on seed data > fingerprint is stable 1`] = `
+{
+  "a1": 85.8,
+  "calibration": 90.9,
+  "calls": 5022,
+  "goals": [
+    [
+      "g1",
+      103,
+      62,
+      14,
+      "At Risk",
+    ],
+    [
+      "g2",
+      68,
+      32,
+      0,
+      "In Progress",
+    ],
+    [
+      "g3",
+      1069,
+      555,
+      0,
+      "Met",
+    ],
+    [
+      "g4",
+      79,
+      8,
+      0,
+      "In Progress",
+    ],
+    [
+      "g5",
+      45,
+      37,
+      0,
+      "At Risk",
+    ],
+    [
+      "g6",
+      44,
+      30,
+      0,
+      "At Risk",
+    ],
+  ],
+  "queue": 31,
+  "queueHead": [
+    "2855010",
+    "2854968",
+    "2854914",
+    "2854881",
+    "2854925",
+  ],
+  "teamTrend": [
+    79.2,
+    81.2,
+    83.1,
+    84.3,
+    86.2,
+  ],
+  "todayN": 27,
+}
+`;
